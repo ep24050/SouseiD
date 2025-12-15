@@ -1,1 +1,73 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
 
+.container {
+    background-color: white;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* 状態表示ボックスの基本スタイル */
+.status-box {
+    margin: 20px 0;
+    padding: 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.2em;
+    transition: all 0.3s ease;
+}
+
+/* 未接続のときのスタイル */
+.disconnected {
+    background-color: #ffebee; /* 薄い赤 */
+    color: #d32f2f;
+    border: 2px solid #ffcdd2;
+}
+
+/* 接続中のときのスタイル */
+.connected {
+    background-color: #e3f2fd; /* 薄い青 */
+    color: #1976d2;
+    border: 2px solid #bbdefb;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 5px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+}
+
+#connect-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#disconnect-btn {
+    background-color: #9E9E9E;
+    color: white;
+}
+
+/* ボタンが無効化されているとき */
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.uuid-info {
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 30px;
+    word-break: break-all;
+}
