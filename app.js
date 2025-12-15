@@ -10,6 +10,7 @@ let bluetoothDevice = null;
 let bluetoothServer = null;
 
 async function connectToDevice() {
+    alert("ボタンは押されました！プログラムは生きています。");
     try {
         statusText.innerText = "検索中...";
         
