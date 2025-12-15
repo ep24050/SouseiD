@@ -1,32 +1,82 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M5Stack BLE Connect</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M5Stack Connect Test</title>
+<style>
+  /* --- ここにCSSが入っています --- */
+  body { font-family: sans-serif; text-align: center; background: #f2f2f7; padding: 20px; }
+  .container { background: white; padding: 30px; border-radius: 16px; margin: 0 auto; max-width: 400px; }
+  .status { font-size: 24px; font-weight: bold; margin: 20px 0; }
+  .circle { font-size: 50px; display: block; margin-bottom: 10px; }
+  button { width: 100%; padding: 15px; font-size: 16px; border: none; border-radius: 8px; margin-bottom: 10px; font-weight: bold; cursor: pointer; }
+  #btn-connect { background: #3182ce; color: white; }
+  #btn-disconnect { background: #e53e3e; color: white; opacity: 0.5; }
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>M5Stack 接続モニター</h1>
-
-        <div id="status-area" class="status-box disconnected">
-            <div id="status-icon">🔴</div>
-            <div id="status-text">未接続</div>
-        </div>
-
-        <div class="button-area">
-            <button id="connect-btn" onclick="connectToDevice()">接続する</button>
-            <button id="disconnect-btn" onclick="disconnectDevice()" disabled>切断する</button>
-        </div>
-        
-        <div class="uuid-info">
-            Target UUID:<br>
-            12345678-1234-1234-1234-1234567890ab
-        </div>
+<div class="container">
+    <h2>M5Stack 接続テスト</h2>
+    
+    <div class="status">
+        <span id="circle" class="circle">🔴</span>
+        <span id="text">未接続</span>
     </div>
 
-    <script src="script.js?v=1"></script>
+    <button id="btn-connect" onclick="connect()">接続する</button>
+    <button id="btn-disconnect" onclick="disconnect()">切断する</button>
+
+    <p style="font-size:10px; color:#888;">Target: 12345678...</p>
+</div>
+
+<script>
+  // --- ここにJavaScriptが入っています ---
+  
+  // ★重要：ここにM5Stackと同じUUIDを入れる
+  const SERVICE_UUID = "12345678-1234-1234-1234-1234567890ab".toLowerCase();
+
+  let device = null;
+
+  async function connect() {
+      // 1. まずボタンが生きているか確認のアラート
+      alert("接続を開始します！");
+
+      try {
+          // 2. デバイスを探す
+          device = await navigator.bluetooth.requestDevice({
+              filters: [{ services: [SERVICE_UUID] }]
+          });
+
+          // 3. 接続する
+          const server = await device.gatt.connect();
+
+          // 4. 成功したら画面を変える
+          document.getElementById("circle").innerText = "🔵";
+          document.getElementById("text").innerText = "接続成功！";
+          document.getElementById("btn-connect").style.opacity = "0.5";
+          document.getElementById("btn-disconnect").style.opacity = "1.0";
+
+          alert("つながりました！");
+
+      } catch (e) {
+          // 失敗したらエラーを表示
+          alert("エラーが出ました:\n" + e);
+      }
+  }
+
+  function disconnect() {
+      if (device && device.gatt.connected) {
+          device.gatt.disconnect();
+          document.getElementById("circle").innerText = "🔴";
+          document.getElementById("text").innerText = "未接続";
+          document.getElementById("btn-connect").style.opacity = "1.0";
+          document.getElementById("btn-disconnect").style.opacity = "0.5";
+          alert("切断しました");
+      }
+  }
+</script>
+
 </body>
 </html>
