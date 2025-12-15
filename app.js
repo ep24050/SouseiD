@@ -1,64 +1,61 @@
 // ■ M5Stack側のService UUID
+// アルファベットの大文字・小文字は問いませんが、ここでは念のため小文字で扱います
 const SERVICE_UUID = "DAF9C0F4-6D30-75AC-416D-764094B787E0".toLowerCase();
 
-let bluetoothDevice = null;
-let bluetoothServer = null;
-
-// 画面の要素を取得
+// 画面要素の取得
 const statusArea = document.getElementById('status-area');
 const statusText = document.getElementById('status-text');
 const statusIcon = document.getElementById('status-icon');
 const connectBtn = document.getElementById('connect-btn');
 const disconnectBtn = document.getElementById('disconnect-btn');
 
+let bluetoothDevice = null;
+let bluetoothServer = null;
+
 /**
- * M5Stackに接続する関数
+ * 接続ボタンを押したときの処理
  */
 async function connectToDevice() {
     try {
-        console.log("デバイスを検索中...");
-
-        // 1. デバイスをスキャン（UUIDでフィルタリング）
-        // 注意: Web Bluetooth APIでは、HTTPS環境でのみ動作します
+        console.log("デバイス検索を開始します...");
+        statusText.innerText = "検索中...";
+        
+        // 1. デバイスをスキャン (このUUIDを持つデバイスのみ表示)
         bluetoothDevice = await navigator.bluetooth.requestDevice({
             filters: [{ services: [SERVICE_UUID] }]
-            // もしUUIDで見つからない場合は、以下のように全デバイス許可で試してください
-            // acceptAllDevices: true,
-            // optionalServices: [SERVICE_UUID]
         });
 
-        // 2. 切断イベントのリスナーを登録（これが重要）
-        // 電源が切れたり距離が離れたときに onDisconnected が呼ばれます
+        // 2. 切断イベントを監視する設定 (電源OFFなどを検知するため)
         bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
 
-        // 3. GATTサーバーに接続
+        // 3. 接続する
         console.log("接続試行中...");
         bluetoothServer = await bluetoothDevice.gatt.connect();
 
-        // 4. 画面表示を更新
+        // 4. 成功したら画面を更新
         console.log("接続成功！");
         updateUI(true);
 
     } catch (error) {
-        console.error("接続エラー:", error);
+        console.error("接続キャンセルまたはエラー:", error);
         alert("接続できませんでした。\n" + error);
         updateUI(false);
     }
 }
 
 /**
- * 手動で切断する関数
+ * 切断ボタンを押したときの処理
  */
 function disconnectDevice() {
     if (bluetoothDevice && bluetoothDevice.gatt.connected) {
         bluetoothDevice.gatt.disconnect();
-        console.log("ユーザー操作により切断しました");
+        console.log("ユーザー操作で切断しました");
     }
 }
 
 /**
- * 切断されたときに自動的に呼ばれる関数
- * (M5Stackの電源が切れた場合なども含む)
+ * 切断されたときに自動で呼ばれる処理
+ * (M5Stackの電源が切れた時や、距離が離れた時など)
  */
 function onDisconnected(event) {
     const device = event.target;
@@ -67,29 +64,26 @@ function onDisconnected(event) {
 }
 
 /**
- * 画面の表示（色や文字）を切り替える関数
- * @param {boolean} isConnected 
+ * 画面の見た目を切り替える関数
  */
 function updateUI(isConnected) {
     if (isConnected) {
-        // 接続中
+        // 接続中モード
         statusArea.classList.remove('disconnected');
         statusArea.classList.add('connected');
-        statusText.textContent = "M5Stackと接続中";
-        statusIcon.textContent = "🔵";
+        statusIcon.innerText = "🔵";
+        statusText.innerText = "接続中";
         
         connectBtn.disabled = true;
         disconnectBtn.disabled = false;
-        disconnectBtn.style.backgroundColor = "#f44336"; // 赤色にする
     } else {
-        // 未接続
+        // 未接続モード
         statusArea.classList.remove('connected');
         statusArea.classList.add('disconnected');
-        statusText.textContent = "未接続";
-        statusIcon.textContent = "🔴";
+        statusIcon.innerText = "🔴";
+        statusText.innerText = "未接続";
 
         connectBtn.disabled = false;
         disconnectBtn.disabled = true;
-        disconnectBtn.style.backgroundColor = "#9E9E9E"; // グレーに戻す
     }
 }
