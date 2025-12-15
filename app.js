@@ -1,6 +1,5 @@
 // ■ M5Stack側のService UUID
-// アルファベットの大文字・小文字は問いませんが、ここでは念のため小文字で扱います
-const SERVICE_UUID = "DAF9C0F4-6D30-75AC-416D-764094B787E0".toLowerCase();
+const SERVICE_UUID = "12345678-1234-1234-1234-1234567890ab".toLowerCase();
 
 // 画面要素の取得
 const statusArea = document.getElementById('status-area');
@@ -25,7 +24,7 @@ async function connectToDevice() {
             filters: [{ services: [SERVICE_UUID] }]
         });
 
-        // 2. 切断イベントを監視する設定 (電源OFFなどを検知するため)
+        // 2. 切断イベントを監視する設定 
         bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
 
         // 3. 接続する
