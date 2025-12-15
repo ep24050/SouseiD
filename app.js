@@ -1,38 +1,61 @@
-// ■ M5Stack側のService UUID
 const SERVICE_UUID = "12345678-1234-1234-1234-1234567890ab".toLowerCase();
 
-// ... (変数はそのまま) ...
+const statusArea = document.getElementById('status-area');
+const statusText = document.getElementById('status-text');
+const statusIcon = document.getElementById('status-icon');
+const connectBtn = document.getElementById('connect-btn');
+const disconnectBtn = document.getElementById('disconnect-btn');
+
+let bluetoothDevice = null;
+let bluetoothServer = null;
 
 async function connectToDevice() {
     try {
-        console.log("デバイス検索を開始します...");
         statusText.innerText = "検索中...";
         
-        // ★★★ ここを「無差別モード」に変更します ★★★
-        // UUIDが一致しなくても、とにかく近くにいるデバイスを全部リストに出します
         bluetoothDevice = await navigator.bluetooth.requestDevice({
-            acceptAllDevices: true,             // 条件なしで全て表示！
-            optionalServices: [SERVICE_UUID]    // 接続した後でこのUUIDを使うよ、という宣言
+            filters: [{ services: [SERVICE_UUID] }]
         });
 
-        // 2. 切断イベントを監視
         bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
 
-        // 3. 接続する
-        console.log("接続試行中...");
         statusText.innerText = "接続試行中...";
-        
         bluetoothServer = await bluetoothDevice.gatt.connect();
 
-        // 4. 成功したら画面を更新
-        console.log("接続成功！");
         updateUI(true);
 
     } catch (error) {
-        console.error("接続エラー:", error);
-        alert("エラー:\n" + error); // スマホ画面にエラーを出す
+        alert("Error: " + error);
         updateUI(false);
     }
 }
 
-// ... (残りはそのまま) ...
+function disconnectDevice() {
+    if (bluetoothDevice && bluetoothDevice.gatt.connected) {
+        bluetoothDevice.gatt.disconnect();
+    }
+}
+
+function onDisconnected(event) {
+    updateUI(false);
+}
+
+function updateUI(isConnected) {
+    if (isConnected) {
+        statusArea.classList.remove('disconnected');
+        statusArea.classList.add('connected');
+        statusIcon.innerText = "🔵";
+        statusText.innerText = "接続中";
+        
+        connectBtn.disabled = true;
+        disconnectBtn.disabled = false;
+    } else {
+        statusArea.classList.remove('connected');
+        statusArea.classList.add('disconnected');
+        statusIcon.innerText = "🔴";
+        statusText.innerText = "未接続";
+
+        connectBtn.disabled = false;
+        disconnectBtn.disabled = true;
+    }
+}
