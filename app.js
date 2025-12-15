@@ -1,34 +1,27 @@
 // ■ M5Stack側のService UUID
 const SERVICE_UUID = "12345678-1234-1234-1234-1234567890ab".toLowerCase();
 
-// 画面要素の取得
-const statusArea = document.getElementById('status-area');
-const statusText = document.getElementById('status-text');
-const statusIcon = document.getElementById('status-icon');
-const connectBtn = document.getElementById('connect-btn');
-const disconnectBtn = document.getElementById('disconnect-btn');
+// ... (変数はそのまま) ...
 
-let bluetoothDevice = null;
-let bluetoothServer = null;
-
-/**
- * 接続ボタンを押したときの処理
- */
 async function connectToDevice() {
     try {
         console.log("デバイス検索を開始します...");
         statusText.innerText = "検索中...";
         
-        // 1. デバイスをスキャン (このUUIDを持つデバイスのみ表示)
+        // ★★★ ここを「無差別モード」に変更します ★★★
+        // UUIDが一致しなくても、とにかく近くにいるデバイスを全部リストに出します
         bluetoothDevice = await navigator.bluetooth.requestDevice({
-            filters: [{ services: [SERVICE_UUID] }]
+            acceptAllDevices: true,             // 条件なしで全て表示！
+            optionalServices: [SERVICE_UUID]    // 接続した後でこのUUIDを使うよ、という宣言
         });
 
-        // 2. 切断イベントを監視する設定 
+        // 2. 切断イベントを監視
         bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
 
         // 3. 接続する
         console.log("接続試行中...");
+        statusText.innerText = "接続試行中...";
+        
         bluetoothServer = await bluetoothDevice.gatt.connect();
 
         // 4. 成功したら画面を更新
@@ -36,53 +29,10 @@ async function connectToDevice() {
         updateUI(true);
 
     } catch (error) {
-        console.error("接続キャンセルまたはエラー:", error);
-        alert("接続できませんでした。\n" + error);
+        console.error("接続エラー:", error);
+        alert("エラー:\n" + error); // スマホ画面にエラーを出す
         updateUI(false);
     }
 }
 
-/**
- * 切断ボタンを押したときの処理
- */
-function disconnectDevice() {
-    if (bluetoothDevice && bluetoothDevice.gatt.connected) {
-        bluetoothDevice.gatt.disconnect();
-        console.log("ユーザー操作で切断しました");
-    }
-}
-
-/**
- * 切断されたときに自動で呼ばれる処理
- * (M5Stackの電源が切れた時や、距離が離れた時など)
- */
-function onDisconnected(event) {
-    const device = event.target;
-    console.log(`デバイス ${device.name} との接続が切れました`);
-    updateUI(false);
-}
-
-/**
- * 画面の見た目を切り替える関数
- */
-function updateUI(isConnected) {
-    if (isConnected) {
-        // 接続中モード
-        statusArea.classList.remove('disconnected');
-        statusArea.classList.add('connected');
-        statusIcon.innerText = "🔵";
-        statusText.innerText = "接続中";
-        
-        connectBtn.disabled = true;
-        disconnectBtn.disabled = false;
-    } else {
-        // 未接続モード
-        statusArea.classList.remove('connected');
-        statusArea.classList.add('disconnected');
-        statusIcon.innerText = "🔴";
-        statusText.innerText = "未接続";
-
-        connectBtn.disabled = false;
-        disconnectBtn.disabled = true;
-    }
-}
+// ... (残りはそのまま) ...
