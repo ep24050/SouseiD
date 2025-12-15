@@ -51,7 +51,12 @@ button {
 
 #connect-btn { background-color: #3182ce; color: white; }
 #disconnect-btn { background-color: #e53e3e; color: white; }
-button:disabled { background-color: #cbd5e0; color: #718096; cursor: not-allowed; }
+
+button:disabled { 
+    background-color: #cbd5e0 !important; 
+    color: #718096 !important; 
+    cursor: not-allowed; 
+}
 
 .uuid-info {
     margin-top: 20px;
