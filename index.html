@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M5Stack Connection Status</title>
+    <title>M5Stack BLE Connect</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,8 +12,8 @@
         <h1>M5Stack 接続モニター</h1>
 
         <div id="status-area" class="status-box disconnected">
-            <span id="status-icon">🔴</span>
-            <span id="status-text">未接続</span>
+            <div id="status-icon">🔴</div>
+            <div id="status-text">未接続</div>
         </div>
 
         <div class="button-area">
@@ -21,7 +21,10 @@
             <button id="disconnect-btn" onclick="disconnectDevice()" disabled>切断する</button>
         </div>
         
-        <p class="uuid-info">Target UUID:<br>DAF9C0F4-6D30-75AC-416D-764094B787E0</p>
+        <div class="uuid-info">
+            <small>Target UUID:</small><br>
+            DAF9C0F4-6D30...
+        </div>
     </div>
 
     <script src="script.js"></script>
