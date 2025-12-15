@@ -1,5 +1,5 @@
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     text-align: center;
     background-color: #f2f2f7;
     margin: 0;
@@ -16,46 +16,28 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-h1 {
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    color: #555;
-}
-
-/* 状態表示ボックス */
 .status-box {
     margin-bottom: 30px;
     padding: 30px;
     border-radius: 12px;
-    transition: all 0.3s ease;
     border: 2px solid transparent;
 }
 
-#status-icon {
-    font-size: 3rem;
-    margin-bottom: 10px;
-}
+#status-icon { font-size: 3rem; margin-bottom: 10px; }
+#status-text { font-size: 1.5rem; font-weight: bold; }
 
-#status-text {
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-/* 未接続（赤系） */
 .disconnected {
     background-color: #fff5f5;
     color: #e53e3e;
     border-color: #fed7d7;
 }
 
-/* 接続中（青系） */
 .connected {
     background-color: #ebf8ff;
     color: #3182ce;
     border-color: #bee3f8;
 }
 
-/* ボタン */
 button {
     width: 100%;
     padding: 16px;
@@ -65,32 +47,16 @@ button {
     border-radius: 8px;
     cursor: pointer;
     margin-bottom: 10px;
-    transition: opacity 0.2s;
 }
 
-button:active {
-    opacity: 0.8;
-}
-
-#connect-btn {
-    background-color: #3182ce;
-    color: white;
-}
-
-#disconnect-btn {
-    background-color: #e53e3e;
-    color: white;
-}
-
-button:disabled {
-    background-color: #cbd5e0;
-    color: #718096;
-    cursor: not-allowed;
-}
+#connect-btn { background-color: #3182ce; color: white; }
+#disconnect-btn { background-color: #e53e3e; color: white; }
+button:disabled { background-color: #cbd5e0; color: #718096; cursor: not-allowed; }
 
 .uuid-info {
     margin-top: 20px;
     font-size: 0.8rem;
     color: #a0aec0;
     font-family: monospace;
+    word-break: break-all;
 }
