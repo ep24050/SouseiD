@@ -1,1 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M5Stack Connection Status</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+    <div class="container">
+        <h1>M5Stack 接続モニター</h1>
+
+        <div id="status-area" class="status-box disconnected">
+            <span id="status-icon">🔴</span>
+            <span id="status-text">未接続</span>
+        </div>
+
+        <div class="button-area">
+            <button id="connect-btn" onclick="connectToDevice()">接続する</button>
+            <button id="disconnect-btn" onclick="disconnectDevice()" disabled>切断する</button>
+        </div>
+        
+        <p class="uuid-info">Target UUID:<br>DAF9C0F4-6D30-75AC-416D-764094B787E0</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
