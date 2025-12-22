@@ -14,6 +14,13 @@
   #btn-disconnect { background: #e53e3e; color: white; opacity: 0.5; }
   .alert-mode { background-color: #ffeaea; border: 2px solid red; }
   .alert-text { color: red; font-weight: bold; }
+
+  .rssi-container {
+      margin-top: 20px; padding: 15px; background: #f0f0f5; border-radius: 8px; font-size: 14px; text-align: left;
+      display: none;
+  }
+  .rssi-bar-bg { width: 100%; height: 10px; background: #ddd; border-radius: 5px; margin-top: 5px; overflow: hidden; }
+  .rssi-bar-fill { height: 100%; background: #4caf50; width: 0%; transition: width 0.3s, background 0.3s; }
 </style>
 </head>
 <body>
@@ -24,6 +31,14 @@
     <div class="status">
         <span id="circle" class="circle">🔴</span>
         <span id="text">未接続</span>
+    </div>
+
+    <div id="rssi-container" class="rssi-container">
+        <div><strong>信号強度:</strong> <span id="rssi-val">--</span> dBm</div>
+        <div><strong>推定距離:</strong> <span id="dist-val">--</span></div>
+        <div class="rssi-bar-bg">
+            <div id="rssi-bar" class="rssi-bar-fill"></div>
+        </div>
     </div>
 
     <button id="btn-connect" onclick="connect()">接続する</button>
@@ -39,10 +54,14 @@
   async function connect() {
       try {
           device = await navigator.bluetooth.requestDevice({
-              filters: [{ services: [SERVICE_UUID] }]
+              filters: [{ services: [SERVICE_UUID] }],
+              optionalServices: [SERVICE_UUID]
           });
 
           device.addEventListener('gattserverdisconnected', onDisconnected);
+          device.addEventListener('advertisementreceived', onAdvertisementReceived);
+
+          await device.watchAdvertisements();
 
           const server = await device.gatt.connect();
 
@@ -65,6 +84,40 @@
       }
   }
 
+  function onAdvertisementReceived(event) {
+      const rssi = event.rssi;
+      
+      document.getElementById("rssi-val").innerText = rssi;
+      
+      let distText = "";
+      let barColor = "#4caf50";
+      let percentage = 0;
+
+      if (rssi > -50) {
+          distText = "手元 (〜50cm)";
+          percentage = 100;
+          barColor = "#4caf50";
+      } else if (rssi > -70) {
+          distText = "近い (1m〜3m)";
+          percentage = 70;
+          barColor = "#2196f3";
+      } else if (rssi > -90) {
+          distText = "遠い (3m〜10m)";
+          percentage = 40;
+          barColor = "#ff9800";
+      } else {
+          distText = "通信限界 (10m〜)";
+          percentage = 10;
+          barColor = "#f44336";
+      }
+
+      document.getElementById("dist-val").innerText = distText;
+      
+      const bar = document.getElementById("rssi-bar");
+      bar.style.width = percentage + "%";
+      bar.style.background = barColor;
+  }
+
   function onDisconnected(event) {
       if (isManualDisconnect) {
           return;
@@ -74,6 +127,8 @@
       document.getElementById("text").innerText = "接続が切れました！";
       document.getElementById("text").className = "alert-text";
       document.getElementById("main-container").className = "container alert-mode";
+      
+      document.getElementById("rssi-container").style.display = "none";
 
       alert("⚠️ 警告！ M5Stickとの接続が失われました！");
       
@@ -90,11 +145,13 @@
           document.getElementById("text").innerText = "接続中";
           document.getElementById("btn-connect").style.opacity = "0.5";
           document.getElementById("btn-disconnect").style.opacity = "1.0";
+          document.getElementById("rssi-container").style.display = "block";
       } else {
           document.getElementById("circle").innerText = "🔴";
           document.getElementById("text").innerText = "未接続";
           document.getElementById("btn-connect").style.opacity = "1.0";
           document.getElementById("btn-disconnect").style.opacity = "0.5";
+          document.getElementById("rssi-container").style.display = "none";
       }
   }
 </script>
