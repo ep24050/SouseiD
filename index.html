@@ -3,58 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>M5Stick Lost Alert</title>
+<title>M5Stack Lost Alert</title>
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; text-align: center; background: #f2f2f7; padding: 20px; margin: 0; }
-  
-  /* コンテナ共通スタイル */
-  .container { background: white; padding: 30px; border-radius: 16px; margin: 0 auto; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-  
-  /* 起動画面専用スタイル */
-  .splash-title { font-size: 28px; font-weight: bold; color: #333; margin-bottom: 10px; }
-  .splash-subtitle { font-size: 16px; color: #666; margin-bottom: 30px; }
-  .splash-icon { font-size: 80px; margin: 20px 0; display: block; }
-  
-  /* メイン画面スタイル */
+  body { font-family: sans-serif; text-align: center; background: #f2f2f7; padding: 20px; }
+  .container { background: white; padding: 30px; border-radius: 16px; margin: 0 auto; max-width: 400px; }
   .status { font-size: 24px; font-weight: bold; margin: 20px 0; }
   .circle { font-size: 50px; display: block; margin-bottom: 10px; }
-  
-  /* ボタン共通スタイル */
-  button { width: 100%; padding: 15px; font-size: 16px; border: none; border-radius: 8px; margin-bottom: 10px; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
-  button:active { transform: scale(0.98); }
-  
-  #btn-start { background: #333; color: white; margin-top: 20px; }
+  button { width: 100%; padding: 15px; font-size: 16px; border: none; border-radius: 8px; margin-bottom: 10px; font-weight: bold; cursor: pointer; }
   #btn-connect { background: #3182ce; color: white; }
   #btn-disconnect { background: #e53e3e; color: white; opacity: 0.5; }
-  
-  /* 警告時のスタイル */
-  .alert-mode { background-color: #ffeaea !important; border: 2px solid red; animation: shake 0.5s; }
+  .alert-mode { background-color: #ffeaea; border: 2px solid red; }
   .alert-text { color: red; font-weight: bold; }
-
-  /* 表示切り替え用クラス */
-  .hidden { display: none; }
-
-  @keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
-    100% { transform: translateX(0); }
-  }
 </style>
 </head>
 <body>
 
-<div id="splash-screen" class="container">
-    <span class="splash-icon">🔒</span>
-    <div class="splash-title">紛失防止タグ</div>
-    <div class="splash-subtitle">M5Stick Anti-Lost Guard</div>
-    <p style="color:#888; font-size:12px;">Bluetooth接続で<br>紛失を防ぎます</p>
-    <button id="btn-start" onclick="startApp()">スタート</button>
-</div>
-
-<div id="main-container" class="container hidden">
-    <h2>接続ステータス</h2>
+<div class="container" id="main-container">
+    <h2>紛失防止タグ 接続</h2>
     
     <div class="status">
         <span id="circle" class="circle">🔴</span>
@@ -62,7 +27,7 @@
     </div>
 
     <button id="btn-connect" onclick="connect()">接続する</button>
-    <button id="btn-disconnect" onclick="disconnect()">切断する</button>
+    <button id="btn-disconnect" onclick="disconnect()">切断する（手動）</button>
 </div>
 
 <script>
@@ -70,12 +35,6 @@
 
   let device = null;
   let isManualDisconnect = false;
-
-  // ★起動画面からメイン画面へ遷移する関数
-  function startApp() {
-      document.getElementById('splash-screen').classList.add('hidden');
-      document.getElementById('main-container').classList.remove('hidden');
-  }
 
   async function connect() {
       try {
@@ -93,7 +52,7 @@
           alert("接続しました");
 
       } catch (e) {
-          alert("接続キャンセル、またはエラー: " + e);
+          alert(e);
       }
   }
 
@@ -114,13 +73,12 @@
       document.getElementById("circle").innerText = "⚠️";
       document.getElementById("text").innerText = "接続が切れました！";
       document.getElementById("text").className = "alert-text";
-      document.getElementById("main-container").className = "container alert-mode"; // ここで赤枠にする
+      document.getElementById("main-container").className = "container alert-mode";
 
       alert("⚠️ 警告！ M5Stickとの接続が失われました！");
       
       setTimeout(() => {
         updateUI(false);
-        // 赤枠などの警告スタイルを解除
         document.getElementById("main-container").className = "container";
         document.getElementById("text").className = "";
       }, 1000);
