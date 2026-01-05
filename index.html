@@ -54,7 +54,7 @@
 
 <script>
   const SERVICE_UUID = "12345678-1234-1234-1234-1234567890ab".toLowerCase();
-  const CHAR_MOTION_UUID = "12345678-1234-1234-1234-1234567890ac".toLowerCase();
+  const CHAR_MOTION_UUID = "abcd1234-5678-90ab-cdef-1234567890ab".toLowerCase();
 
   let device = null;
   let motionChar = null;
@@ -75,7 +75,7 @@
               motionChar.stopNotifications().catch(e => console.log(e));
           }
           if(document.getElementById("circle").innerText === "🔵") {
-             document.getElementById("text").innerText = mode === 'motion' ? "監視中(動体)" : "接続中(紛失)";
+             document.getElementById("text").innerText = mode === 'motion' ? "監視中" : "接続中";
           }
       }
   }
