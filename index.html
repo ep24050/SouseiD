@@ -38,6 +38,14 @@
 
   async function connect() {
       try {
+          
+          if (Notification.permission === "default") {
+              const permission = await Notification.requestPermission();
+              if (permission !== "granted") {
+                  alert("通知が許可されませんでした。");
+              }
+          }
+
           device = await navigator.bluetooth.requestDevice({
               filters: [{ services: [SERVICE_UUID] }]
           });
@@ -49,10 +57,11 @@
           updateUI(true);
           isManualDisconnect = false;
 
-          alert("接続しました");
+          
+          alert("接続しました。");
 
       } catch (e) {
-          alert(e);
+          alert("エラー: " + e);
       }
   }
 
@@ -70,6 +79,7 @@
           return;
       }
 
+      // UIの更新
       document.getElementById("circle").innerText = "⚠️";
       document.getElementById("text").innerText = "接続が切れました！";
       document.getElementById("text").className = "alert-text";
@@ -78,11 +88,23 @@
       document.getElementById("btn-connect").style.opacity = "1.0";
       document.getElementById("btn-disconnect").style.opacity = "0.5";
 
-      alert("⚠️ 警告！ M5Stickとの接続が失われました！");
+      
+      if (Notification.permission === "granted") {
+          new Notification("⚠️ 紛失警告", {
+              body: "M5Stickとの接続が切れました！確認してください。",
+              icon: "", // 必要ならアイコン画像のURLを指定
+              vibrate: [200, 100, 200] 
+          });
+      } else {
+          // 通知が許可されていない場合は従来通りアラートを出す
+          alert("⚠️ 警告！ M5Stickとの接続が失われました！");
+      }
   }
 
   function updateUI(isConnected) {
       if (isConnected) {
+          document.getElementById("main-container").className = "container";
+          document.getElementById("text").className = "";
           document.getElementById("circle").innerText = "🔵";
           document.getElementById("text").innerText = "接続中";
           document.getElementById("btn-connect").style.opacity = "0.5";
