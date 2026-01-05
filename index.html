@@ -5,15 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>M5Stack Lost Alert</title>
 <style>
-  body { font-family: sans-serif; text-align: center; background: #f2f2f7; padding: 20px; }
-  .container { background: white; padding: 30px; border-radius: 16px; margin: 0 auto; max-width: 400px; }
+  body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; background: #f2f2f7; padding: 20px; }
+  .container { background: white; padding: 30px; border-radius: 16px; margin: 0 auto; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
   .status { font-size: 24px; font-weight: bold; margin: 20px 0; }
   .circle { font-size: 50px; display: block; margin-bottom: 10px; }
   button { width: 100%; padding: 15px; font-size: 16px; border: none; border-radius: 8px; margin-bottom: 10px; font-weight: bold; cursor: pointer; }
-  #btn-connect { background: #3182ce; color: white; }
-  #btn-disconnect { background: #e53e3e; color: white; opacity: 0.5; }
-  .alert-mode { background-color: #ffeaea; border: 2px solid red; }
-  .alert-text { color: red; font-weight: bold; }
+  #btn-connect { background: #007aff; color: white; }
+  #btn-disconnect { background: #ff3b30; color: white; opacity: 0.5; }
+  .alert-mode { background-color: #ffeaea; border: 2px solid #ff3b30; }
+  .alert-text { color: #ff3b30; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -31,6 +31,7 @@
 </div>
 
 <script>
+  // M5StackのUUID (小文字で統一)
   const SERVICE_UUID = "12345678-1234-1234-1234-1234567890ab".toLowerCase();
 
   let device = null;
@@ -38,13 +39,7 @@
 
   async function connect() {
       try {
-          
-          if (Notification.permission === "default") {
-              const permission = await Notification.requestPermission();
-              if (permission !== "granted") {
-                  alert("通知が許可されませんでした。");
-              }
-          }
+          // 通知(Notification)関連のコードはすべて削除しました
 
           device = await navigator.bluetooth.requestDevice({
               filters: [{ services: [SERVICE_UUID] }]
@@ -57,8 +52,8 @@
           updateUI(true);
           isManualDisconnect = false;
 
-          
-          alert("接続しました。");
+          // 接続成功時もポップアップを出します
+          alert("✅ 接続しました！");
 
       } catch (e) {
           alert("エラー: " + e);
@@ -75,11 +70,12 @@
   }
 
   function onDisconnected(event) {
+      // 手動で切った場合は何もしない
       if (isManualDisconnect) {
           return;
       }
 
-      // UIの更新
+      // 画面を赤くする
       document.getElementById("circle").innerText = "⚠️";
       document.getElementById("text").innerText = "接続が切れました！";
       document.getElementById("text").className = "alert-text";
@@ -89,16 +85,9 @@
       document.getElementById("btn-disconnect").style.opacity = "0.5";
 
       
-      if (Notification.permission === "granted") {
-          new Notification("⚠️ 紛失警告", {
-              body: "M5Stickとの接続が切れました！確認してください。",
-              icon: "", // 必要ならアイコン画像のURLを指定
-              vibrate: [200, 100, 200] 
-          });
-      } else {
-          // 通知が許可されていない場合は従来通りアラートを出す
-          alert("⚠️ 警告！ M5Stickとの接続が失われました！");
-      }
+      setTimeout(() => {
+          alert("⚠️ 警告！\n\nM5Stickとの接続が切れました！\n確認してください。");
+      }, 100);
   }
 
   function updateUI(isConnected) {
