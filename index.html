@@ -30,7 +30,7 @@
 <body>
 
 <div class="container" id="main-container">
-    <h2>M5Stack Guard</h2>
+    <h2>紛失防止アプリ</h2>
     
     <div class="mode-switch">
         <button id="mode-lost" class="mode-btn active" onclick="setMode('lost')">紛失防止</button>
@@ -54,13 +54,14 @@
 
 <script>
   const SERVICE_UUID = "12345678-1234-1234-1234-1234567890ab".toLowerCase();
-  const CHAR_MOTION_UUID = "abcd1234-5678-90ab-cdef-1234567890ab".toLowerCase();
+  const CHAR_MOTION_UUID = "12345678-1234-1234-1234-1234567890ac".toLowerCase();
 
   let device = null;
   let motionChar = null;
   let isManualDisconnect = false;
   let currentMode = 'lost';
   let isAlertShowing = false;
+  let isCooldown = false;
 
   function setMode(mode) {
       currentMode = mode;
@@ -115,7 +116,7 @@
 
   function onMotionDetected() {
       if (currentMode !== 'motion') return;
-      if (isAlertShowing) return;
+      if (isAlertShowing || isCooldown) return;
 
       isAlertShowing = true;
 
@@ -128,9 +129,16 @@
           alert("⚠️ 警告：傘が動かされました！\n\n確認してください。");
           
           isAlertShowing = false;
+          isCooldown = true;
+
           if (device && device.gatt.connected) {
               updateUI(true);
           }
+
+          setTimeout(() => {
+              isCooldown = false;
+          }, 5000);
+
       }, 100);
   }
 
