@@ -121,12 +121,12 @@
       isAlertShowing = true;
 
       document.getElementById("main-container").className = "container motion-mode";
-      document.getElementById("circle").innerText = "🏃⚠️";
+      document.getElementById("circle").innerText = "⚠️";
       document.getElementById("text").innerText = "動きました！";
       document.getElementById("text").className = "motion-text";
 
       setTimeout(() => {
-          alert("⚠️ 警告：傘が動かされました！\n\n確認してください。");
+          alert("⚠️ 警告：動きを検知しました！");
           
           isAlertShowing = false;
           isCooldown = true;
@@ -188,7 +188,7 @@
           document.getElementById("main-container").className = "container";
           document.getElementById("text").className = "";
           document.getElementById("circle").innerText = "🔵";
-          document.getElementById("text").innerText = currentMode === 'motion' ? "監視中(動体)" : "接続中(紛失)";
+          document.getElementById("text").innerText = currentMode === 'motion' ? "監視中" : "接続中";
           document.getElementById("btn-connect").style.opacity = "0.5";
           document.getElementById("btn-disconnect").style.opacity = "1.0";
           document.getElementById("last-location").style.display = "none";
