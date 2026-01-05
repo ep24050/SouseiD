@@ -3,21 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>M5Stack Lost Alert (+GPS)</title>
+<title>M5Stack Guard</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; background: #f2f2f7; padding: 20px; }
   .container { background: white; padding: 30px; border-radius: 16px; margin: 0 auto; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
   .status { font-size: 24px; font-weight: bold; margin: 20px 0; }
   .circle { font-size: 50px; display: block; margin-bottom: 10px; }
   
+  .mode-switch { display: flex; justify-content: center; margin-bottom: 20px; background: #eee; padding: 5px; border-radius: 8px; }
+  .mode-btn { flex: 1; padding: 10px; border: none; background: transparent; cursor: pointer; border-radius: 6px; font-weight: bold; color: #888; }
+  .mode-btn.active { background: white; color: #007aff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
   button { width: 100%; padding: 15px; font-size: 16px; border: none; border-radius: 8px; margin-bottom: 10px; font-weight: bold; cursor: pointer; }
   #btn-connect { background: #007aff; color: white; }
   #btn-disconnect { background: #ff3b30; color: white; opacity: 0.5; }
   
   .alert-mode { background-color: #ffeaea; border: 2px solid #ff3b30; }
+  .motion-mode { background-color: #e6fffa; border: 2px solid #38b2ac; }
   .alert-text { color: #ff3b30; font-weight: bold; }
+  .motion-text { color: #38b2ac; font-weight: bold; }
 
-  /* 位置情報表示エリアのスタイル */
   .location-info { margin-top: 20px; padding: 15px; background: #edf2f7; border-radius: 8px; font-size: 14px; text-align: left; display: none; }
   .location-info a { color: #007aff; text-decoration: none; font-weight: bold; }
 </style>
@@ -25,8 +30,13 @@
 <body>
 
 <div class="container" id="main-container">
-    <h2>紛失防止タグ 接続</h2>
+    <h2>M5Stack Guard</h2>
     
+    <div class="mode-switch">
+        <button id="mode-lost" class="mode-btn active" onclick="setMode('lost')">紛失防止</button>
+        <button id="mode-motion" class="mode-btn" onclick="setMode('motion')">動き検知</button>
+    </div>
+
     <div class="status">
         <span id="circle" class="circle">🔴</span>
         <span id="text">未接続</span>
@@ -34,7 +44,7 @@
 
     <button id="btn-connect" onclick="connect()">接続する</button>
     <button id="btn-disconnect" onclick="disconnect()">切断する</button>
-
+    
     <div id="last-location" class="location-info">
         <b>📍 切断地点を記録しました:</b><br>
         <a id="map-link" href="#" target="_blank">Googleマップで見る</a>
@@ -44,13 +54,33 @@
 
 <script>
   const SERVICE_UUID = "12345678-1234-1234-1234-1234567890ab".toLowerCase();
+  const CHAR_MOTION_UUID = "abcd1234-5678-90ab-cdef-1234567890ab".toLowerCase();
 
   let device = null;
+  let motionChar = null;
   let isManualDisconnect = false;
+  let currentMode = 'lost';
+  let isAlertShowing = false;
+
+  function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('mode-lost').className = mode === 'lost' ? 'mode-btn active' : 'mode-btn';
+      document.getElementById('mode-motion').className = mode === 'motion' ? 'mode-btn active' : 'mode-btn';
+      
+      if(device && device.gatt.connected && motionChar) {
+          if(mode === 'motion') {
+              motionChar.startNotifications().catch(e => console.log(e));
+          } else {
+              motionChar.stopNotifications().catch(e => console.log(e));
+          }
+          if(document.getElementById("circle").innerText === "🔵") {
+             document.getElementById("text").innerText = mode === 'motion' ? "監視中(動体)" : "接続中(紛失)";
+          }
+      }
+  }
 
   async function connect() {
       try {
-         
           navigator.geolocation.getCurrentPosition(()=>{}, ()=>{});
 
           device = await navigator.bluetooth.requestDevice({
@@ -59,15 +89,49 @@
 
           device.addEventListener('gattserverdisconnected', onDisconnected);
 
-          await device.gatt.connect();
+          const server = await device.gatt.connect();
+          const service = await server.getPrimaryService(SERVICE_UUID);
+
+          try {
+              motionChar = await service.getCharacteristic(CHAR_MOTION_UUID);
+              motionChar.addEventListener('characteristicvaluechanged', (event) => {
+                  onMotionDetected();
+              });
+              if (currentMode === 'motion') {
+                  await motionChar.startNotifications();
+              }
+          } catch(err) {
+              console.log(err);
+          }
 
           updateUI(true);
           isManualDisconnect = false;
-          alert("✅ 接続しました！");
+          alert("✅ 接続しました！\n現在のモード: " + (currentMode==='lost' ? "紛失防止" : "動き検知"));
 
       } catch (e) {
           alert("エラー: " + e);
       }
+  }
+
+  function onMotionDetected() {
+      if (currentMode !== 'motion') return;
+      if (isAlertShowing) return;
+
+      isAlertShowing = true;
+
+      document.getElementById("main-container").className = "container motion-mode";
+      document.getElementById("circle").innerText = "🏃⚠️";
+      document.getElementById("text").innerText = "動きました！";
+      document.getElementById("text").className = "motion-text";
+
+      setTimeout(() => {
+          alert("⚠️ 警告：傘が動かされました！\n\n確認してください。");
+          
+          isAlertShowing = false;
+          if (device && device.gatt.connected) {
+              updateUI(true);
+          }
+      }, 100);
   }
 
   function disconnect() {
@@ -82,37 +146,33 @@
   function onDisconnected(event) {
       if (isManualDisconnect) return;
 
-      // 画面をアラートモードに
       document.getElementById("circle").innerText = "⚠️";
       document.getElementById("text").innerText = "接続が切れました！";
       document.getElementById("text").className = "alert-text";
       document.getElementById("main-container").className = "container alert-mode";
       document.getElementById("btn-connect").style.opacity = "1.0";
       document.getElementById("btn-disconnect").style.opacity = "0.5";
+      
+      if (currentMode === 'lost') {
+          navigator.geolocation.getCurrentPosition(
+              (position) => {
+                  const lat = position.coords.latitude;
+                  const lng = position.coords.longitude;
+                  const mapUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+                  const time = new Date().toLocaleTimeString();
 
-      // ▼▼▼ ここで現在位置を取得して表示 ▼▼▼
-      navigator.geolocation.getCurrentPosition(
-          (position) => {
-              const lat = position.coords.latitude;
-              const lng = position.coords.longitude;
-              const mapUrl = `https://www.google.com/maps?q=${lat},${lng}`;
-              const time = new Date().toLocaleTimeString();
-
-              const locDiv = document.getElementById("last-location");
-              const link = document.getElementById("map-link");
-              
-              link.href = mapUrl;
-              document.getElementById("timestamp").innerText = `時刻: ${time}`;
-              locDiv.style.display = "block"; // エリアを表示
-          },
-          (error) => {
-              console.log("位置情報の取得に失敗: " + error.message);
-          }
-      );
-
-      setTimeout(() => {
-          alert("⚠️ 警告！\n\nM5Stickとの接続が切れました！\n確認してください。");
-      }, 100);
+                  const locDiv = document.getElementById("last-location");
+                  const link = document.getElementById("map-link");
+                  
+                  link.href = mapUrl;
+                  document.getElementById("timestamp").innerText = `時刻: ${time}`;
+                  locDiv.style.display = "block";
+              }
+          );
+          setTimeout(() => alert("⚠️ 警告！接続が切れました\n(位置情報を記録しました)"), 100);
+      } else {
+          setTimeout(() => alert("⚠️ 警告！接続が切れました\n(動き監視を中断)"), 100);
+      }
   }
 
   function updateUI(isConnected) {
@@ -120,10 +180,10 @@
           document.getElementById("main-container").className = "container";
           document.getElementById("text").className = "";
           document.getElementById("circle").innerText = "🔵";
-          document.getElementById("text").innerText = "接続中";
+          document.getElementById("text").innerText = currentMode === 'motion' ? "監視中(動体)" : "接続中(紛失)";
           document.getElementById("btn-connect").style.opacity = "0.5";
           document.getElementById("btn-disconnect").style.opacity = "1.0";
-          document.getElementById("last-location").style.display = "none"; // 接続時は場所を隠す
+          document.getElementById("last-location").style.display = "none";
       } else {
           document.getElementById("circle").innerText = "🔴";
           document.getElementById("text").innerText = "未接続";
