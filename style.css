@@ -1,1 +1,192 @@
+/* ===== 基本スタイル ===== */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  text-align: center;
+  background: #f2f2f7;
+  margin: 0;
+  padding: 0;
+}
 
+.page {
+  display: none; /* デフォルト非表示 */
+  width: 100%;
+  max-width: 400px;
+  margin: 20px auto;
+  padding: 20px;
+  background: white;       /* カード風白背景 */
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+
+  min-height:80vh;
+}
+
+.page.active { display: block; }
+
+.header {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* ===== ステータス ===== */
+.status {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.circle {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* ===== モード切替 ===== */
+.mode-switch {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  background: #eee;
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: bold;
+  color: #888;
+}
+
+.mode-btn.active {
+  background: white;
+  color: #007aff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* ===== ボタン ===== */
+.button {
+  width: 100%;
+  padding: 15px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.connect-btn { background: #007aff; color: white; margin-top: 10px;}
+.disconnect-btn { background: #ff3b30; color: white; opacity: 0.5; }
+.normal-btn { background: #f0f0f0; color: #333; }
+
+/* ===== アラート・動作表示 ===== */
+.alert-text { color: #ff3b30; font-weight: bold; }
+.motion-text { color: #38b2ac; font-weight: bold; }
+
+/* ===== 位置情報 ===== */
+.location-info {
+  margin-top: 20px;
+  padding: 15px;
+  background: #edf2f7;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: left;
+  display: none;
+}
+
+.location-info a { color: #007aff; text-decoration: none; font-weight: bold; }
+
+/* ===== スライド式スイッチ ===== */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 28px;
+  margin: 10px 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  border-radius: 28px;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.4s;
+}
+
+.switch input:checked + .slider {
+  background-color: #4cd964;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(32px);
+}
+
+.switch-status {
+  display: inline-block;
+  margin-left: 10px;
+  font-weight: bold;
+  vertical-align: middle;
+  color: gray;
+}
+
+/* ===== アコーディオン ===== */
+.accordion { margin-bottom: 10px; text-align: left; }
+.accordion-header {
+  background: #99cc66;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background: #e0e0e0;
+  padding: 0 10px;
+  border-radius: 6px;
+  margin-top: 5px;
+  
+  
+}
+.accordion-content input { width: 50px; }
+
+
+.accordion-content button {
+  margin-top: 5px; /* 上マージンを少なくする */
+  margin-bottom: 5px; /* 下マージンも調整 */
+}
+
+
+/* ===== RSSI バー ===== */
+.rssi-bar-bg { width: 100%; height: 10px; background: #ddd; border-radius: 5px; margin-top: 5px; }
+.rssi-bar-fill { height: 100%; width: 0; background: #007aff; border-radius: 5px; transition: width 0.3s; }
